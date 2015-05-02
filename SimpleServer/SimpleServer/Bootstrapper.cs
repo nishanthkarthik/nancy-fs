@@ -1,4 +1,4 @@
-﻿namespace NetServer
+﻿namespace SimpleServer
 {
     using Nancy;
 
