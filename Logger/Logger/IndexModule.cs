@@ -15,9 +15,11 @@ namespace Logger
         public IndexModule()
         {
             Get["/"] = parameters => View["index"];
+
             Get["/LogResx"] = parameters =>
             {
-                string relPath = string.Format(@"~/Out/{0}.zip", Guid.NewGuid().ToString());
+                string guid = Guid.NewGuid().ToString();
+                string relPath = string.Format(@"~/Out/{0}.zip", guid);
                 try
                 {
                     CleanupZip(HttpContext.Current.Server.MapPath(@"~/Out"), "*.zip");
@@ -25,6 +27,7 @@ namespace Logger
                     {
                         zipFile.CompressionLevel = CompressionLevel.BestSpeed;
                         zipFile.CompressionMethod = CompressionMethod.BZip2;
+                        zipFile.Password = File.ReadAllText(HttpContext.Current.Server.MapPath(@"~/Data/cred.log"));
                         zipFile.AddDirectory(HttpContext.Current.Server.MapPath(@"~/Out"));
                         zipFile.Save(HttpContext.Current.Server.MapPath(relPath));
                         return Response.AsFile(HttpContext.Current.Server.MapPath(relPath));
@@ -36,6 +39,7 @@ namespace Logger
                     return HttpStatusCode.InternalServerError;
                 }
             };
+
             Post["/AddLogx"] = parameter =>
             {
                 if (!VerifyData(Request)) return HttpStatusCode.BadRequest;

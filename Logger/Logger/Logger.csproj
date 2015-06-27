@@ -75,6 +75,9 @@
       <SubType>Designer</SubType>
     </Content>
     <Content Include="packages.config" />
+    <Content Include="Data\cred.log" />
+    <None Include="Properties\PublishProfiles\servicenode - FTP.pubxml" />
+    <None Include="Properties\PublishProfiles\servicenode - Web Deploy.pubxml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -84,7 +87,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Data\" />
     <Folder Include="Out\" />
   </ItemGroup>
   <PropertyGroup>
