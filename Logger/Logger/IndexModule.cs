@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Web;
+using Ionic.Zip;
+using Ionic.Zlib;
 using Nancy;
 
 namespace Logger
@@ -14,7 +17,24 @@ namespace Logger
             Get["/"] = parameters => View["index"];
             Get["/LogResx"] = parameters =>
             {
-                
+                string relPath = string.Format(@"~/Out/{0}.zip", Guid.NewGuid().ToString());
+                try
+                {
+                    CleanupZip(HttpContext.Current.Server.MapPath(@"~/Out"), "*.zip");
+                    using (ZipFile zipFile = new ZipFile())
+                    {
+                        zipFile.CompressionLevel = CompressionLevel.BestSpeed;
+                        zipFile.CompressionMethod = CompressionMethod.BZip2;
+                        zipFile.AddDirectory(HttpContext.Current.Server.MapPath(@"~/Out"));
+                        zipFile.Save(HttpContext.Current.Server.MapPath(relPath));
+                        return Response.AsFile(HttpContext.Current.Server.MapPath(relPath));
+                    }
+                }
+                catch (Exception exception)
+                {
+                    Debug.WriteLine(exception.Message);
+                    return HttpStatusCode.InternalServerError;
+                }
             };
             Post["/AddLogx"] = parameter =>
             {
@@ -30,6 +50,15 @@ namespace Logger
                 return HttpStatusCode.Accepted;
             };
             Get["/schema"] = x => string.Join("\n", LogEntry.MemberList);
+        }
+
+        private void CleanupZip(string folderPath, string fileNameLike)
+        {
+            DirectoryInfo directory = new DirectoryInfo(folderPath);
+            foreach (FileInfo file in directory.EnumerateFiles(fileNameLike))
+            {
+                file.Delete();
+            }
         }
 
         private static bool VerifyData(Request request)
