@@ -1,4 +1,4 @@
-﻿namespace SimpleServer
+﻿namespace Logger
 {
     using Nancy;
 
