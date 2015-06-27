@@ -14,10 +14,12 @@ namespace Logger
     {
         public IndexModule()
         {
+            StaticConfiguration.DisableErrorTraces = false;
             Get["/"] = parameters => View["index"];
 
             Get["/LogResx"] = parameters =>
             {
+                AssertOutDir();
                 string guid = Guid.NewGuid().ToString();
                 string relPath = string.Format(@"~/Out/{0}.zip", guid);
                 try
@@ -42,6 +44,7 @@ namespace Logger
 
             Post["/AddLogx"] = parameter =>
             {
+                AssertOutDir();
                 if (!VerifyData(Request)) return HttpStatusCode.BadRequest;
                 Dictionary<string, string> dictionary =
                     LogEntry.MemberList.ToDictionary<string, string, string>(entry => entry,
@@ -54,6 +57,12 @@ namespace Logger
                 return HttpStatusCode.Accepted;
             };
             Get["/schema"] = x => string.Join("\n", LogEntry.MemberList);
+        }
+
+        private void AssertOutDir()
+        {
+            if (!Directory.Exists(HttpContext.Current.Server.MapPath(@"~/Out")))
+                Directory.CreateDirectory(HttpContext.Current.Server.MapPath(@"~/Out"));
         }
 
         private void CleanupZip(string folderPath, string fileNameLike)
