@@ -14,7 +14,6 @@ namespace Logger
     {
         public IndexModule()
         {
-            StaticConfiguration.DisableErrorTraces = false;
             Get["/"] = parameters => View["index"];
 
             Get["/LogResx"] = parameters =>
@@ -27,7 +26,7 @@ namespace Logger
                     CleanupZip(HttpContext.Current.Server.MapPath(@"~/Out"), "*.zip");
                     using (ZipFile zipFile = new ZipFile())
                     {
-                        zipFile.CompressionLevel = CompressionLevel.BestSpeed;
+                        zipFile.CompressionLevel = CompressionLevel.Level7;
                         zipFile.CompressionMethod = CompressionMethod.BZip2;
                         zipFile.Password = File.ReadAllText(HttpContext.Current.Server.MapPath(@"~/Data/cred.log"));
                         zipFile.AddDirectory(HttpContext.Current.Server.MapPath(@"~/Out"));
@@ -52,7 +51,7 @@ namespace Logger
                 StreamWriter stream = File.CreateText(
                     HttpContext.Current.Server.MapPath(string.Format(@"~/Out/{0}_{1}.txt",
                         DateTime.Now.ToString("yyyyMMddHHmmssfff"), Guid.NewGuid().ToString())));
-                stream.WriteLine(string.Join("~", dictionary.Select(t => t.Key + "-=-" + t.Value).ToArray()));
+                stream.WriteLine(string.Join(",", dictionary.Select(t => t.Key + "==" + t.Value).ToArray()));
                 stream.Close();
                 return HttpStatusCode.Accepted;
             };
@@ -85,8 +84,6 @@ namespace Logger
 
     static class LogEntry
     {
-        public static readonly string[] MemberList = {
-            "Type","Data","TimeStamp","MachineId"
-        };
+        public static string[] MemberList = File.ReadAllLines(HttpContext.Current.Server.MapPath(@"~/Data/template.txt"));
     }
 }
